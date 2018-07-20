@@ -73,33 +73,38 @@ class Sudoku
     @@dim = dim
   end
 
-  def read_from_file(f_name)
+  def solve(f_name)
     @matrix, @entities = FileParser.new.parse(f_name)
-  end
-end
+    print_sudoku(@matrix)
+    while pass_through do
 
-def pass_through
-  r1, r2, r3 = false
-  @matrix.each_with_index do |row, row_index|
-    row.each_with_index do |cell, col_index|
-      # check each column
-      (1..@@dim).each do |i|
-        r1 = r1 || cell.remove(@matrix[row_index][i].value)
-      end
-      # check each row
-      (1..@@dim).each do |i|
-        r2 = r2 || cell.remove(@matrix[i][col_index].value)
-      end
-      # check entity squares
-      entity = @entities[entity_for_coordinates(row_index, col_index)]
-      @entities[entity].each do |c|
-        r3 = r3 || cell.remove(c.value)
+    end
+
+  end
+
+  def pass_through
+    r1, r2, r3 = false
+    @matrix.each_with_index do |row, row_index|
+      row.each_with_index do |cell, col_index|
+        # check each column
+        (1..@@dim).each do |i|
+          r1 = r1 || cell.remove(@matrix[row_index][i - 1].value)
+        end
+        # check each row
+        (1..@@dim).each do |i|
+          r2 = r2 || cell.remove(@matrix[i - 1][col_index].value)
+        end
+        # check entity squares
+        entity = @entities[entity_for_coordinates(row_index, col_index)]
+        @entities[entity].each do |c|
+          r3 = r3 || cell.remove(c.value)
+        end
       end
     end
+    r1 || r2 || r3
   end
-  r1 || r2 || r3
 end
 
 s = Sudoku.new
-f_name = "data/example1.txt"
-s.read_from_file(f_name)
+f_name = "data/example2.txt"
+s.solve(f_name)
