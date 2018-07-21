@@ -35,8 +35,7 @@ class Cell
   def remove(to_remove)
     removed = @available.delete(to_remove)
     if (@available.length == 1)
-      @value = @available[0]
-      @available.pop
+      @value = @available.pop
     end
     removed
   end
@@ -75,36 +74,35 @@ class Sudoku
 
   def solve(f_name)
     @matrix, @entities = FileParser.new.parse(f_name)
-    print_sudoku(@matrix)
     while pass_through do
 
     end
-
+    print_sudoku(@matrix)
   end
 
   def pass_through
-    r1, r2, r3 = false
+    r = false
     @matrix.each_with_index do |row, row_index|
       row.each_with_index do |cell, col_index|
         # check each column
         (1..@@dim).each do |i|
-          r1 = r1 || cell.remove(@matrix[row_index][i - 1].value)
+          r = cell.remove(@matrix[row_index][i - 1].value) || r
         end
         # check each row
         (1..@@dim).each do |i|
-          r2 = r2 || cell.remove(@matrix[i - 1][col_index].value)
+          r = cell.remove(@matrix[i - 1][col_index].value) || r
         end
         # check entity squares
         entity = @entities[entity_for_coordinates(row_index, col_index)]
-        @entities[entity].each do |c|
-          r3 = r3 || cell.remove(c.value)
+        entity.each do |c|
+          r = cell.remove(c.value) || r
         end
       end
     end
-    r1 || r2 || r3
+    r
   end
 end
 
 s = Sudoku.new
-f_name = "data/example2.txt"
+f_name = "data/example3.txt"
 s.solve(f_name)

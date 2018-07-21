@@ -10,4 +10,5 @@ def print_sudoku(sudoku)
     end
     puts
   end
+  puts
 end
