@@ -21,14 +21,13 @@ class Cell
 
   def value=(value)
     @value = value
-    @available = []
   end
 
   def is_set
     @value && @value > 0
   end
 
-  def available_values
+  def available
     @available
   end
 
@@ -39,11 +38,12 @@ class Cell
     end
     removed
   end
+
 end
 
 class FileParser
-  def parse(string)
-    lines = File.readlines(string)
+  def parse(filename)
+    lines = File.readlines(filename)
     Sudoku.dim = lines.length
     sudoku_matrix = Array.new(Sudoku.dim)
     entity_matrix_array = Array.new(Sudoku.dim) {[]}
@@ -63,6 +63,7 @@ end
 
 class Sudoku
   @@dim = 0
+  @solved = false
 
   def self.dim
     @@dim
@@ -72,8 +73,8 @@ class Sudoku
     @@dim = dim
   end
 
-  def solve(f_name)
-    @matrix, @entities = FileParser.new.parse(f_name)
+  def solve(filename)
+    @matrix, @entities = FileParser.new.parse(filename)
     while pass_through do
 
     end
@@ -101,8 +102,58 @@ class Sudoku
     end
     r
   end
+
+  def bt(x, y)
+    if (x == dim - 1) && (y == dim - 1)
+      true
+    else
+      cell = @matrix[x][y]
+      cell.available.each do |value|
+        cell.value = value
+        bt(*next_xy(x,y))
+      end
+    end
+  end
+
+  def backtrack(x, y)
+    if @solved
+      return
+    end
+
+    if (x >= dim - 1) && (y >= dim - 1)
+      @solved = true
+      return
+    end
+
+    cell = @matrix[x][y]
+    if cell.is_set
+      backtrack(*next_xy(x, y))
+    else
+      cell.available.each do |value|
+        cell.value = value
+        if is_valid_solution(x, y)
+          backtrack(*next_xy(x, y))
+          unless @solved
+            cell.value = 0
+          end
+        end
+        cell.value = 0
+      end
+    end
+  end
+
+  def next_xy(x, y)
+    if y < dim
+      return x, y + 1
+    else
+      return x + 1, 0
+    end
+  end
+
+  def is_valid_solution(x, y)
+    # code here
+  end
 end
 
-s = Sudoku.new
-f_name = "data/example3.txt"
-s.solve(f_name)
+
+Sudoku.new.solve("data/example3.txt")
